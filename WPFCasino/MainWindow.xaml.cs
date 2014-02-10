@@ -24,11 +24,11 @@ namespace WPFCasino
     /// </summary>
     public partial class MainWindow : Window
     {
-        //Инициализируем поля
+        //Init fields
         //serializedTables needs to be removed on Cards level from window level
         Table displayedTable;
         Player player = new Player();
-        MemoryStream[] serizlizedTables;
+        Initializer myGame = new Initializer();
         Dictionary<string, ImageBrush> cardsImages;
         List<Label> playerCardLabels = new List<Label>();
         //Initialize components on Program start
@@ -43,18 +43,17 @@ namespace WPFCasino
         //EvenHandler for Game Start
         private void startBtn_Click(object sender, RoutedEventArgs e)
         {
-            cardsImages = (new Initializer()).GetImageStack();
+            cardsImages = myGame.GetImageStack();
             myCanvas.Children.RemoveRange(0, 2);
             ImageBrush backForCanvas = new ImageBrush() { ImageSource = new BitmapImage(new Uri(BaseUriHelper.GetBaseUri(this), "Images/cardBack.jpg")) };
             myCanvas.Background = backForCanvas;
-            serizlizedTables = new MemoryStream[10]; 
             for (int i = 0; i < 10; i++)
             {
                 CardStack temp = (new Initializer()).InitCards();
                 temp.Shuffle();
-                serizlizedTables[i] = SerializeTable(new Table(temp));
+                myGame.serizlizedTables[i] = Initializer.SerializeTable(new Table(temp));
             }
-            displayedTable = DeserializeTable(serizlizedTables[0]);
+            displayedTable = Initializer.DeserializeTable(myGame.serizlizedTables[0]);
             InitTableButton();
             InitSwitchButton();
             InitBetBox();
@@ -64,22 +63,7 @@ namespace WPFCasino
             playerCardsGrid.Visibility = System.Windows.Visibility.Visible;
 
         }
-        //Methods used to serialize/deserizlize tables - need to be removed to Cards level
-        private static MemoryStream SerializeTable(Table table)
-        {
-            BinaryFormatter formatter = new BinaryFormatter();
-            MemoryStream temp = new MemoryStream();
-            formatter.Serialize(temp, table);
-            return temp;
-  
-        }
-        private static Table DeserializeTable(MemoryStream stream)
-        {
-            BinaryFormatter formatter = new BinaryFormatter();
-            stream.Seek(0, SeekOrigin.Begin);
-            Table temp = (Table)formatter.Deserialize(stream);
-            return temp;
-        }
+       
 
         //EventHandler for Switch button
         private void switchButton_Click(object sender, RoutedEventArgs e)
@@ -87,8 +71,8 @@ namespace WPFCasino
             if (player.CurrentTable  < 9)
             {
                 player.CurrentTable += 1;
-                serizlizedTables[player.CurrentTable - 1] = SerializeTable(displayedTable);
-                displayedTable = DeserializeTable(serizlizedTables[player.CurrentTable]);
+                myGame.serizlizedTables[player.CurrentTable - 1] = Initializer.SerializeTable(displayedTable);
+                displayedTable = Initializer.DeserializeTable(myGame.serizlizedTables[player.CurrentTable]);
                 InitTableButton();
                 DrowCards();
                 winLoseText.Text = displayedTable.Message;
@@ -100,8 +84,8 @@ namespace WPFCasino
             else
             {
                 player.CurrentTable = 0;
-                serizlizedTables[9] = SerializeTable(displayedTable);
-                displayedTable = DeserializeTable(serizlizedTables[player.CurrentTable]);
+                myGame.serizlizedTables[9] = Initializer.SerializeTable(displayedTable);
+                displayedTable = Initializer.DeserializeTable(myGame.serizlizedTables[player.CurrentTable]);
                 InitTableButton();
                 DrowCards();
                 winLoseText.Text = displayedTable.Message;

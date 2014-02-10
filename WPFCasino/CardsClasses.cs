@@ -9,20 +9,18 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Security.Cryptography;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 
 namespace WPFCasino
 {
-    //Класс для инициализации набора карт.
+    //Iinitalize card stacks for game
     [Serializable]
     class Initializer
     {
-
+        public MemoryStream[] serizlizedTables = new MemoryStream[10];
         CardStack tempStack = new CardStack();
-        /*
-        ImageBrush backForCanvas = new ImageBrush() { ImageSource = new BitmapImage(new Uri(BaseUriHelper.GetBaseUri(this), "Images/cardBack.jpg")) };
-            myCanvas.Background = backForCanvas;
-         */
         int[] values = new [] { 2, 3, 4, 5, 6, 7, 8, 9, 10 };
         Dictionary<char, int> images = new Dictionary<char, int>();
         Dictionary<string, ImageBrush> imageStack = new Dictionary<string,ImageBrush>();
@@ -41,21 +39,12 @@ namespace WPFCasino
                 
                 ImageBrush backForCanvas = new ImageBrush() { ImageSource = new BitmapImage(new Uri(String.Format(@"\CardsImage\{0}{1}.png", values[i],imagesM[j]), UriKind.Relative)) };
                 tempStack.AddCard(new Card(values[i], String.Format("{0}{1}", values[i],imagesM[j])));
-                 
-                /*
-                ImageBrush backForCanvas = new ImageBrush() { ImageSource = new BitmapImage(new Uri(String.Format(@"\CardsImage\{0}C.png",values[i]),UriKind.Relative))};
-                tempStack.AddCard(new Card(values[i],String.Format("{0}C",values[i])));
-                 */
             }
             foreach (KeyValuePair<char,int> item in images)
             {
                 
                 ImageBrush backForCanvas = new ImageBrush() { ImageSource = new BitmapImage(new Uri(String.Format(@"\CardsImage\{0}{1}.png",item.Key,imagesM[j]),UriKind.Relative))};
                 tempStack.AddCard(new Card(item.Value,String.Format("{0}{1}",item.Key,imagesM[j])));
-                 /*
-                ImageBrush backForCanvas = new ImageBrush() { ImageSource = new BitmapImage(new Uri(String.Format(@"\CardsImage\{0}C.png",item.Key),UriKind.Relative))};
-                tempStack.AddCard(new Card(item.Value,String.Format("{0}C",item.Key)));
-                  */
             }
             
         }
@@ -82,10 +71,27 @@ namespace WPFCasino
             }
             return imageStack;
         }
+                
+        //Methods used to serialize/deserizlize tables - need to be removed to Cards level
+        public static MemoryStream SerializeTable(Table table)
+        {
+            BinaryFormatter formatter = new BinaryFormatter();
+            MemoryStream temp = new MemoryStream();
+            formatter.Serialize(temp, table);
+            return temp;
+
+        }
+        public static Table DeserializeTable(MemoryStream stream)
+        {
+            BinaryFormatter formatter = new BinaryFormatter();
+            stream.Seek(0, SeekOrigin.Begin);
+            Table temp = (Table)formatter.Deserialize(stream);
+            return temp;
+        }
 
     }
     [Serializable]
-    //Класс для сущности - Карта
+
     class Card
     {
         int cardValue;
@@ -106,7 +112,7 @@ namespace WPFCasino
             CardName = nameForCard;
         }
     }
-    //Класс для сущности - Колода Карт
+
     [Serializable]
     class CardStack
     {
