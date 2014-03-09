@@ -24,8 +24,6 @@ namespace WPFCasino
     /// </summary>
     public partial class MainWindow : Window
     {
-        //Init fields
-        //serializedTables needs to be removed on Cards level from window level
         Table displayedTable;
         Player player = new Player();
         Initializer myGame = new Initializer();
@@ -132,7 +130,7 @@ namespace WPFCasino
 
             }
         //EvenHandler for Pass button
-        //PC AI needs to be removed in sepatrate class on Player level
+        
         private void pasBtn_Click(object sender, RoutedEventArgs e)
             {
                 if (displayedTable.IsDealed)
@@ -200,7 +198,7 @@ namespace WPFCasino
         private void InitSwitchButton()
         {
             switchButton.Visibility = System.Windows.Visibility.Visible;
-            switchButton.Content = "Switch table";
+            switchButton.Content = WPFCasinoConstants.switchText;
 
         }
         private void InitBetBox()
